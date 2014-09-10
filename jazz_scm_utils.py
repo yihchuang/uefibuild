@@ -20,12 +20,14 @@ def load(scmExe, strSandBox, strRepoWS):
     runCmd = rectifyList(runCmd)
     logging.debug("\nafter rectification: runCmd:")
     logging.debug(runCmd)
-    p = subprocess.Popen(runCmd, shell=True)
+    p = subprocess.Popen(runCmd)
     p.wait()
-    #stdout = open("stdout.txt","wb")
-    #stderr = open("stderr.txt","wb")
-    #returnCode = subprocess.call(runCmd, stdout=stdout, stderr=stderr, , shell=True)
-    #logging.info("returnCode: " + returnCode)
+    returnCode = p.returncode
+    logging.debug("Popen.returncode: " + returnCode)
+    if returnCode == 0 :
+        logging.info("load function completed successfully.")
+    else:
+        raise ValueError("load function failed to complete.")    
     logging.info("<-- exits load function")
     return
 
@@ -42,19 +44,25 @@ def unload(scmExe, strSandBox, strRepoWS):
     runCmd.append("-w")
 
     # Need to make sure enclosed by double quote
-    print "strRepoWS: " + strRepoWS
-    print strRepoWS.startswith("\"")
+    logging.debug("strRepoWS: " + strRepoWS)
+    #print strRepoWS.startswith("\"")
     if strRepoWS.startswith("\"") == False:
         strRepoWS = '"' + strRepoWS + '"'
-    print "strRepoWS[2]: " + strRepoWS
+        logging.debug("strRepoWS[2]: " + strRepoWS)
 
     runCmd.append(strRepoWS)
     print runCmd
 
     runCmd = rectifyList(runCmd)
-    print "\nafter rectification:\n", runCmd
-    logging.debug("\nafter rectification:\n", runCmd)
+    logging.debug("\nafter rectification runCmd:")
+    logging.debug(runCmd)
     p = subprocess.Popen(runCmd)
     p.wait()
+    returnCode = p.returncode
+    logging.debug("Popen.returncode: " + returnCode)
+    if returnCode == 0 :
+        logging.info("unload function completed successfully.")
+    else:
+        raise ValueError("unload function failed to complete.")    
     logging.info("<-- exits unload function")
     return
