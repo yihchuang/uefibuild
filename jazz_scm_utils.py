@@ -23,7 +23,7 @@ def load(scmExe, strSandBox, strRepoWS):
     p = subprocess.Popen(runCmd)
     p.wait()
     returnCode = p.returncode
-    logging.debug("Popen.returncode: " + returnCode)
+    logging.debug("Popen.returncode: " + str(returnCode))
     if returnCode == 0 :
         logging.info("load function completed successfully.")
     else:
@@ -59,7 +59,8 @@ def unload(scmExe, strSandBox, strRepoWS):
     p = subprocess.Popen(runCmd)
     p.wait()
     returnCode = p.returncode
-    logging.debug("Popen.returncode: " + returnCode)
+    logging.debug("Popen.returncode: " + str(returnCode))
+
     if returnCode == 0 :
         logging.info("unload function completed successfully.")
     else:
