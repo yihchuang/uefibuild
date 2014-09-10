@@ -62,11 +62,11 @@ def uefiBuild(pythonExe, buildScript, strBUILDID, strBUILDDATE, strBUILDVERSION,
 	p.wait() # wait until subprocess to complete  
 	return
 	
-def archiveBuild(targetDir, strConfigfile, srcImageFile):
+def archiveBuild(targetDir, strBuildIniFile, srcImageFile):
 	"Archiving build config file and output image file."
 	if not os.path.exists(targetDir):
 		os.makedirs(targetDir)
-	shutil.copy(strConfigfile, targetDir)
+	shutil.copy(strBuildIniFile, targetDir)
 	shutil.copy(srcImageFile, targetDir)
 	return
 	
@@ -81,3 +81,10 @@ def platformInfo(strPlatform):
 		aslExe = "C:\\ASL_Brickland\\iasl.exe"	
 	direc = {'buildOutputSubDirectoryPrefix' : buildOutputSubDirectoryPrefix, 'aslExe' : aslExe}
 	return direc
+
+def ensureFileExists(fileName):
+	"ensure input file does exist, or raise exception"
+	if not os.path.isfile(fileName):
+	       logging.debug(fileName + " was not found.")
+	       raise ValueError(fileName + " was not found.")
+	return

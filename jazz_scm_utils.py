@@ -1,13 +1,14 @@
 import subprocess
 import shlex
 import ConfigParser
+import logging
 
 from yihutils import rectifyList as rectifyList
 
 def load(scmExe, strSandBox, strRepoWS):
 	"scm load workspace to local sandbox"
 	
-	print "entering load function"
+	logging.info("--> enters load function")
 	runCmd = []
 	##scm=r"C:\RTC-Client-Win-4.0.5\jazz\scmtools\eclipse\scm.exe"
 	argList0 = "load --all -r jazz7 --force -d"
@@ -15,17 +16,19 @@ def load(scmExe, strSandBox, strRepoWS):
 	runCmd.extend(shlex.split(argList0))
 	runCmd.append(strSandBox)
 	runCmd.append(strRepoWS)
-	print runCmd
+	#logging.debug("runCmd:", runCmd)
 
 	runCmd = rectifyList(runCmd)
-	print "\nafter rectification:\n", runCmd
+	logging.debug("\nafter rectification:\n", runCmd)
 
 	p = subprocess.Popen(runCmd)
 	p.wait()
+	logging.info("<-- exits load function")
 	return
 
 def unload(scmExe, strSandBox, strRepoWS):
 	"scm unload local sandbox"
+	logging.info("--> enters unload function")
 	print "entering unload function"
 	runCmd = []
 	##scm=r"C:\RTC-Client-Win-4.0.5\jazz\scmtools\eclipse\scm.exe"
@@ -48,6 +51,8 @@ def unload(scmExe, strSandBox, strRepoWS):
 
 	runCmd = rectifyList(runCmd)
 	print "\nafter rectification:\n", runCmd
+	logging.debug("\nafter rectification:\n", runCmd)
 	p = subprocess.Popen(runCmd)
 	p.wait()
+	logging.info("<-- exits unload function")
 	return

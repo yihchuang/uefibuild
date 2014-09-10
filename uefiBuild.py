@@ -7,8 +7,10 @@ from yihutils import rectifyString as rectifyString
 from yihutils import delTree as delTree
 from yihutils import uefiBuild as uefiBuild
 from yihutils import archiveBuild as archiveBuild
+from yihutils import ensureFileExists as ensureFileExists
 
 logging.basicConfig(filename='yih.log',level=logging.DEBUG)
+logging.info("\n---------------------------------------------")
 logging.info(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S"))
 
 # pre-set but can be overridden if system.ini is input.
@@ -20,9 +22,9 @@ aslDir = "C:\\ASL\\"
 archiveRootDir="C:\\uEFI_build\\archive\\"
 
 #get input parameters: build ini file (required) and system ini file (optional)
-buildIniFile = ''
-systemIniFile = ''
 def main(argv):
+	buildIniFile = ''
+	systemIniFile = ''
 	try:
 		opts, args = getopt.getopt(argv,"hb:s:",["buildIniFile=","systemIniFile="])
 	except getopt.GetoptError:
@@ -45,18 +47,19 @@ def main(argv):
 	}
 	return direc 
 
-direc = {}
+direcIni = {}
 if __name__ == "__main__":
-	direc = main(sys.argv[1:])
+	direcIni = main(sys.argv[1:])
 
-print "direc:"
-print direc
+logging.debug("direcIni:")
+logging.debug(direcIni)
 
-strConfigfile = direc['buildIniFile']
-logging.debug("strConfigfile: " + strConfigfile)
+strBuildIniFile = direcIni['buildIniFile']
+logging.debug("strBuildIniFile: " + strBuildIniFile)
+ensureFileExists(strBuildIniFile)
 config = ConfigParser.ConfigParser()
 config.sections()
-config.read(strConfigfile)
+config.read(strBuildIniFile)
 strBUILDID = config.get("build", "BUILDID")
 strBUILDDATE = config.get("build", "BUILDDATE")
 strBUILDVERSION = config.get("build", "BUILDVERSION")
@@ -67,7 +70,7 @@ strSandBox = config.get("Jazz sm", "SandBox")
 strRepoWS = config.get("Jazz sm", "RepositoyWorkSpaceName")
 ## compose a python directory to contain parameters
 direc = { 
-'strConfigfile' : strConfigfile,
+'strBuildIniFile' : strBuildIniFile,
 'strBUILDID' : strBUILDID,
 'strBUILDDATE' : strBUILDDATE,
 'strBUILDVERSION' : strBUILDVERSION,
@@ -80,12 +83,13 @@ direc = {
 logging.debug(direc)
 
 ## configure system settings
-if not systemIniFile == "":
-	strSystemConfigfile = direc['systemIniFile']
-	logging.debug("strSystemConfigfile: " + strSystemConfigfile)
+strSystemIniFile = direcIni['systemIniFile']
+if not strSystemIniFile == "":
+	ensureFileExists(strSystemIniFile)
+	logging.debug("strSystemIniFile: " + strSystemIniFile)
 	config = ConfigParser.ConfigParser()
 	config.sections()
-	config.read(strSystemConfigfile)
+	config.read(strSystemIniFile)
 	pythonExe = config.get("system", "pythonExe")
 	scmExe = config.get("system", "scmExe")
 ## compose a python directory to contain parameters
@@ -114,9 +118,9 @@ else:
 	print "error!"
 
 ## scm load local sandbox
-logging.debug("->start scm load local sandbox")
+logging.info("->start scm load local sandbox")
 load(scmExe, direc['strSandBox'], direc['strRepoWS'])
-logging.debug("<- end scm load local sandbox")
+logging.info("<- end scm load local sandbox")
 #TODO: need to check error to make sure enlist completes successfully
 ## end of scm load
 
@@ -143,13 +147,13 @@ if strPlatform == "Grantley":
 	srcImageFile=strSandBox.decode('string_escape') + "\\Build\\PlatformPkg\\DEBUG_" + strTOOL_CHAIN_TAG + "\\FV\\" + strBUILDID + ".upd"
 	logging.debug("save build output file: " + srcImageFile)
 	print "srcImageFile: " + srcImageFile
-	archiveBuild(archiveDir, strConfigfile, srcImageFile)
+	archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
 elif strPlatform == "Brickland":
 		print "archiveBrickland"
 		srcImageFile=strSandBox.decode('string_escape') + "\\Build\\\BricklandPkg\\DEBUG_" + strTOOL_CHAIN_TAG + "\\FV\\" + strBUILDID + ".upd"
 		logging.debug("save build output file: " + srcImageFile)
 		print "srcImageFile: " + srcImageFile
-		archiveBuild(archiveDir, strConfigfile, srcImageFile)
+		archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
 else: 
 	logging.critical("unknown platform was found!")
 	print "error!"
