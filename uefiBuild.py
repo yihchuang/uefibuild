@@ -1,8 +1,8 @@
-import os, getopt, ConfigParser, subprocess, shlex, sys
-import datetime, shutil, time, logging, winsound
+import os, getopt, ConfigParser, sys
+import datetime, shutil, logging, winsound
 from jazz_scm_utils import load as load
-from jazz_scm_utils import unload as unload
-from yihutils import rectifyList as rectifyList
+##from jazz_scm_utils import unload as unload
+
 from yihutils import rectifyString as rectifyString
 from yihutils import delTree as delTree
 from yihutils import uefiBuild as uefiBuild
@@ -23,33 +23,32 @@ archiveRootDir="C:\\uEFI_build\\archive\\"
 
 #get input parameters: build ini file (required) and system ini file (optional)
 def main(argv):
-	buildIniFile = ''
-	systemIniFile = ''
-	try:
-		opts, args = getopt.getopt(argv,"hb:s:",["buildIniFile=","systemIniFile="])
-	except getopt.GetoptError:
-		print sys.argv[0] + ' -b <buildConfig.ini> -s <systemConfig.ini>'
-		sys.exit(2)
-	for opt, arg in opts:
-		if opt == '-h':
-			print sys.argv[0] + ' -b <buildConfig.ini> -s <systemConfig.ini>'
-			sys.exit()
-		elif opt in ("-b", "--buildIniFile"):
-			buildIniFile = arg
-		elif opt in ("-s", "--systemIniFile"):
-			systemIniFile = arg
-			print "YIH: systemIniFile: " + systemIniFile 
-	print 'Build ini file is: ', buildIniFile
-	print 'System ini file is: ', systemIniFile
-	direc = {
-	'buildIniFile' : buildIniFile,
-	'systemIniFile' : systemIniFile
-	}
-	return direc 
+    buildIniFile = ''
+    systemIniFile = ''
+    try:
+        opts, args = getopt.getopt(argv,"hb:s:",["buildIniFile=","systemIniFile="])
+    except getopt.GetoptError:
+        print sys.argv[0] + ' -b <buildConfig.ini> -s <systemConfig.ini>'
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print sys.argv[0] + ' -b <buildConfig.ini> -s <systemConfig.ini>'
+            sys.exit()
+        elif opt in ("-b", "--buildIniFile"):
+            buildIniFile = arg
+        elif opt in ("-s", "--systemIniFile"):
+            systemIniFile = arg
+    print 'Build ini file is: ', buildIniFile
+    print 'System ini file is: ', systemIniFile
+    direc = {
+    'buildIniFile' : buildIniFile,
+    'systemIniFile' : systemIniFile
+    }
+    return direc 
 
 direcIni = {}
 if __name__ == "__main__":
-	direcIni = main(sys.argv[1:])
+    direcIni = main(sys.argv[1:])
 
 logging.debug("direcIni:")
 logging.debug(direcIni)
@@ -85,13 +84,13 @@ logging.debug(direc)
 ## configure system settings
 strSystemIniFile = direcIni['systemIniFile']
 if not strSystemIniFile == "":
-	ensureFileExists(strSystemIniFile)
-	logging.debug("strSystemIniFile: " + strSystemIniFile)
-	config = ConfigParser.ConfigParser()
-	config.sections()
-	config.read(strSystemIniFile)
-	pythonExe = config.get("system", "pythonExe")
-	scmExe = config.get("system", "scmExe")
+    ensureFileExists(strSystemIniFile)
+    logging.debug("strSystemIniFile: " + strSystemIniFile)
+    config = ConfigParser.ConfigParser()
+    config.sections()
+    config.read(strSystemIniFile)
+    pythonExe = config.get("system", "pythonExe")
+    scmExe = config.get("system", "scmExe")
 ## compose a python directory to contain parameters
 direcSys = { 
 'pythonExe' : pythonExe,
@@ -108,14 +107,14 @@ delTree(outputDir)
 
 ## copy iasl.exe per platform 
 if strPlatform == "Grantley": 
-	logging.debug("copy iasl.exe to C:\ASL for Grantley build")
-	shutil.copy("C:\\ASL_Grantley\\iasl.exe", "C:\\ASL\\")
+    logging.debug("copy iasl.exe to C:\ASL for Grantley build")
+    shutil.copy("C:\\ASL_Grantley\\iasl.exe", "C:\\ASL\\")
 elif strPlatform == "Brickland":
-	logging.debug("copy iasl.exe to C:\ASL for Brickland build")
-	shutil.copy("C:\\ASL_Brickland\\iasl.exe", "C:\\ASL\\")
+    logging.debug("copy iasl.exe to C:\ASL for Brickland build")
+    shutil.copy("C:\\ASL_Brickland\\iasl.exe", "C:\\ASL\\")
 else: 
-	logging.critical("unknown platform was found!")
-	print "error!"
+    logging.critical("unknown platform was found!")
+    print "error!"
 
 ## scm load local sandbox
 logging.info("->start scm load local sandbox")
@@ -143,20 +142,20 @@ archiveDir = archiveRootDir + "\\" + strBUILDID + "-" + strBUILDVERSION + "_" + 
 logging.debug("new directory to archive build input and output: ", archiveDir)
 print "archiveDir " + archiveDir
 if strPlatform == "Grantley": 
-	print "archiveGrantley"
-	srcImageFile=strSandBox.decode('string_escape') + "\\Build\\PlatformPkg\\DEBUG_" + strTOOL_CHAIN_TAG + "\\FV\\" + strBUILDID + ".upd"
-	logging.debug("save build output file: " + srcImageFile)
-	print "srcImageFile: " + srcImageFile
-	archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
+    print "archiveGrantley"
+    srcImageFile=strSandBox.decode('string_escape') + "\\Build\\PlatformPkg\\DEBUG_" + strTOOL_CHAIN_TAG + "\\FV\\" + strBUILDID + ".upd"
+    logging.debug("save build output file: " + srcImageFile)
+    print "srcImageFile: " + srcImageFile
+    archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
 elif strPlatform == "Brickland":
-		print "archiveBrickland"
-		srcImageFile=strSandBox.decode('string_escape') + "\\Build\\\BricklandPkg\\DEBUG_" + strTOOL_CHAIN_TAG + "\\FV\\" + strBUILDID + ".upd"
-		logging.debug("save build output file: " + srcImageFile)
-		print "srcImageFile: " + srcImageFile
-		archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
+        print "archiveBrickland"
+        srcImageFile=strSandBox.decode('string_escape') + "\\Build\\\BricklandPkg\\DEBUG_" + strTOOL_CHAIN_TAG + "\\FV\\" + strBUILDID + ".upd"
+        logging.debug("save build output file: " + srcImageFile)
+        print "srcImageFile: " + srcImageFile
+        archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
 else: 
-	logging.critical("unknown platform was found!")
-	print "error!"
-	
-#beep to notify	
+    logging.critical("unknown platform was found!")
+    print "error!"
+    
+#beep to notify    
 winsound.Beep(440, 250)
