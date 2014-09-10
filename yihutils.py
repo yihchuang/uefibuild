@@ -49,6 +49,7 @@ def uefiBuild(pythonExe, buildScript, strBUILDID, strBUILDDATE, strBUILDVERSION,
     print "strBUILDVERSION: " + strBUILDVERSION
     print "strTOOL_CHAIN_TAG: " + strTOOL_CHAIN_TAG
 
+    logging.info("--> enters uefiBuild function")
     runCmd = []
     runCmd.append(pythonExe)
     runCmd.append(buildScript)
@@ -62,17 +63,22 @@ def uefiBuild(pythonExe, buildScript, strBUILDID, strBUILDDATE, strBUILDVERSION,
     logging.debug("start building")
     p = subprocess.Popen(runCmd)
     p.wait() # wait until subprocess to complete  
+    logging.info("<-- exits uefiBuild function")
     return
 
 def archiveBuild(targetDir, strBuildIniFile, srcImageFile):
     "Archiving build config file and output image file."
+    logging.info("--> enters archiveBuild function")
     if not os.path.exists(targetDir):
         os.makedirs(targetDir)
     shutil.copy(strBuildIniFile, targetDir)
     shutil.copy(srcImageFile, targetDir)
+    logging.info("<-- exits archiveBuild function")
     return
 
-def platformInfo(strPlatform):
+def platformInfoRetrieval(strPlatform):
+    "platform info retrieval"
+    logging.info("--> enters platformInfoRetrieval function")
     buildOutputSubDirectoryPrefix = ''
     aslExe = ''
     if strPlatform == "Grantley": 
@@ -82,6 +88,7 @@ def platformInfo(strPlatform):
         buildOutputSubDirectoryPrefix = "\\Build\\\BricklandPkg\\DEBUG_"
         aslExe = "C:\\ASL_Brickland\\iasl.exe"	
     direc = {'buildOutputSubDirectoryPrefix' : buildOutputSubDirectoryPrefix, 'aslExe' : aslExe}
+    logging.info("<-- exits platformInfoRetrieval function")
     return direc
 
 def ensureFileExists(fileName):

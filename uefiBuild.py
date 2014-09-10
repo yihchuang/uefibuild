@@ -139,7 +139,7 @@ logging.debug("<- end uefi build")
 
 #archiveDir = workingDir + "\\" + strBUILDID + "-" + strBUILDVERSION + "_" + strPlatform + "_archivedAt_" + datetime.datetime.now().strftime("%Y-%m-%d-%H%M_%S")
 archiveDir = archiveRootDir + "\\" + strBUILDID + "-" + strBUILDVERSION + "_" + strPlatform + "_archivedAt_" + datetime.datetime.now().strftime("%Y-%m-%d-%H%M_%S")
-logging.debug("new directory to archive build input and output: ", archiveDir)
+logging.debug("new directory to archive build input and output: " + archiveDir)
 print "archiveDir " + archiveDir
 if strPlatform == "Grantley": 
     print "archiveGrantley"
