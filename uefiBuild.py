@@ -1,8 +1,8 @@
-import os, getopt, ConfigParser, sys
+import os, getopt, sys
 import datetime, shutil, logging, winsound
-from jazz_scm_utils import load as load
-##from jazz_scm_utils import unload as unload
 
+from jazz_scm_utils import scmLoad as scmLoad
+from jazz_scm_utils import scmLoad as scmUnload
 from yihutils import rectifyString as rectifyString
 from yihutils import delTree as delTree
 from yihutils import uefiBuild as uefiBuild
@@ -23,6 +23,7 @@ aslGrantleyExe ="C:\\ASL_Grantley\\iasl.exe"
 aslBricklandExe = "C:\\ASL_Brickland\\iasl.exe"
 aslDir = "C:\\ASL\\"
 archiveRootDir="C:\\uEFI_build\\archive\\"
+scmUnloadAtTheEnd=True
 
 #get input parameters: build ini file (required) and system ini file (optional)
 def main(argv):
@@ -88,10 +89,11 @@ if not strSystemIniFile == "":
         aslDir = direcSystem['aslDir']
 
 # retrieve platform dependent info:
-direcPlatform = platformInfoRetrieval(direcBuild['Platform'])
+direcPlatform = platformInfoRetrieval(direcBuild['Platform'], direcBuild['SandBox'], direcBuild['TOOL_CHAIN_TAG'], direcBuild['BUILDID'])
 buildOutputSubDirectoryPrefix = direcPlatform['buildOutputSubDirectoryPrefix']
 aslExe = direcPlatform['aslExe']    
 buildScript = direcPlatform['buildScript']
+srcImageFile = direcPlatform['srcImageFile']
 
 ## clean up build directory to make sure a clean build
 outputDir=SandBox.decode('string_escape') + "\\Build\\"
@@ -101,10 +103,10 @@ delTree(outputDir)
 ## copy iasl.exe per platform 
 shutil.copy(aslExe, aslDir)
 
-## scm load local sandbox
-logging.info("-> starts scm load local sandbox")
-load(scmExe, SandBox, RepoWS)
-logging.info("<- ends scm load local sandbox")
+## scm scmLoad local sandbox
+logging.info("-> starts scm scmLoad local sandbox")
+scmLoad(scmExe, SandBox, RepoWS)
+logging.info("<- ends scm scmLoad local sandbox")
 
 #cache the current working directory before change directory to sandbox
 workingDir=os.getcwd()
@@ -123,21 +125,10 @@ logging.debug("<- ends uEFI build")
 archiveDir = archiveRootDir + "\\" + BUILDID + "-" + BUILDVERSION + "_" + Platform + "_archivedAt_" + datetime.datetime.now().strftime("%Y-%m-%d-%H%M_%S")
 logging.debug("new directory to archive build input and output: " + archiveDir)
 print "archiveDir " + archiveDir
-if Platform == "Grantley": 
-    print "archiveGrantley"
-    srcImageFile=SandBox.decode('string_escape') + "\\Build\\PlatformPkg\\DEBUG_" + TOOL_CHAIN_TAG + "\\FV\\" + BUILDID + ".upd"
-    logging.debug("save build output file: " + srcImageFile)
-    print "srcImageFile: " + srcImageFile
-    archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
-elif Platform == "Brickland":
-        print "archiveBrickland"
-        srcImageFile=SandBox.decode('string_escape') + "\\Build\\\BricklandPkg\\DEBUG_" + TOOL_CHAIN_TAG + "\\FV\\" + BUILDID + ".upd"
-        logging.debug("save build output file: " + srcImageFile)
-        print "srcImageFile: " + srcImageFile
-        archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
-else: 
-    logging.critical("unknown platform was found!")
-    print "error!"
-    
+
+archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
+
+if scmUnloadAtTheEnd == True:
+    scmUnload(scmExe, SandBox, RepoWS)
 #beep to notify    
 winsound.Beep(440, 250)
