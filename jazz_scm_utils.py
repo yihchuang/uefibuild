@@ -4,7 +4,7 @@ import logging
 
 from yihutils import rectifyList as rectifyList
 
-def load(scmExe, strSandBox, strRepoWS):
+def load(scmExe, SandBox, strRepoWS):
     "scm load workspace to local sandbox"
 
     logging.info("--> enters load function")
@@ -12,7 +12,7 @@ def load(scmExe, strSandBox, strRepoWS):
     argList0 = "load --all -r jazz7 --force -d"
     runCmd.append(scmExe)
     runCmd.extend(shlex.split(argList0))
-    runCmd.append(strSandBox)
+    runCmd.append(SandBox)
     runCmd.append(strRepoWS)
     logging.debug("runCmd:")
     logging.debug(runCmd)
@@ -31,7 +31,7 @@ def load(scmExe, strSandBox, strRepoWS):
     logging.info("<-- exits load function")
     return
 
-def unload(scmExe, strSandBox, strRepoWS):
+def unload(scmExe, SandBox, strRepoWS):
     "scm unload local sandbox"
     logging.info("--> enters unload function")
     print "entering unload function"
@@ -40,7 +40,7 @@ def unload(scmExe, strSandBox, strRepoWS):
 
     runCmd.append(scmExe.decode('string_escape'))
     runCmd.extend(shlex.split(argList0))
-    runCmd.append(strSandBox)
+    runCmd.append(SandBox)
     runCmd.append("-w")
 
     # Need to make sure enclosed by double quote
