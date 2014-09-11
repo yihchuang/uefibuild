@@ -1,13 +1,11 @@
-import subprocess
-import shlex
-import logging
+import subprocess, shlex, logging
 
 from yihutils import rectifyList as rectifyList
 
-def load(scmExe, SandBox, strRepoWS):
+def scmLoad(scmExe, SandBox, strRepoWS):
     "scm load workspace to local sandbox"
 
-    logging.info("--> enters load function")
+    logging.info("--> enters scmLoad function")
     runCmd = []
     argList0 = "load --all -r jazz7 --force -d"
     runCmd.append(scmExe)
@@ -25,30 +23,30 @@ def load(scmExe, SandBox, strRepoWS):
     returnCode = p.returncode
     logging.debug("Popen.returncode: " + str(returnCode))
     if returnCode == 0 :
-        logging.info("load function completed successfully.")
+        logging.info("scmLoad function completed successfully.")
     else:
-        raise ValueError("load function failed to complete.")    
-    logging.info("<-- exits load function")
+        raise ValueError("scmLoad function failed to complete.")    
+    logging.info("<-- exits scmLoad function")
     return
 
-def unload(scmExe, SandBox, strRepoWS):
+def scmUnload(scmExe, SandBox, strRepoWS):
     "scm unload local sandbox"
-    logging.info("--> enters unload function")
-    print "entering unload function"
+    logging.info("--> enters scmUnload function")
+    print "entering scmUnload function"
     runCmd = []
     argList0 = "unload --overwrite-uncommitted -r jazz7 -d"
 
-    runCmd.append(scmExe.decode('string_escape'))
+    runCmd.append(scmExe)
     runCmd.extend(shlex.split(argList0))
     runCmd.append(SandBox)
     runCmd.append("-w")
 
-    # Need to make sure enclosed by double quote
     logging.debug("strRepoWS: " + strRepoWS)
+    # Need to make sure enclosed by double quote
     #print strRepoWS.startswith("\"")
-    if strRepoWS.startswith("\"") == False:
-        strRepoWS = '"' + strRepoWS + '"'
-        logging.debug("strRepoWS[2]: " + strRepoWS)
+    #if strRepoWS.startswith("\"") == False:
+    #    strRepoWS = '"' + strRepoWS + '"'
+    #    logging.debug("strRepoWS[2]: " + strRepoWS)
 
     runCmd.append(strRepoWS)
     print runCmd
@@ -62,8 +60,8 @@ def unload(scmExe, SandBox, strRepoWS):
     logging.debug("Popen.returncode: " + str(returnCode))
 
     if returnCode == 0 :
-        logging.info("unload function completed successfully.")
+        logging.info("scmUnload function completed successfully.")
     else:
-        raise ValueError("unload function failed to complete.")    
-    logging.info("<-- exits unload function")
+        raise ValueError("scmUnload function failed to complete.")    
+    logging.info("<-- exits scmUnload function")
     return
