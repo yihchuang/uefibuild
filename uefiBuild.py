@@ -2,7 +2,7 @@ import os, getopt, sys
 import datetime, shutil, logging, winsound
 
 from jazz_scm_utils import scmLoad as scmLoad
-from jazz_scm_utils import scmLoad as scmUnload
+from jazz_scm_utils import scmUnload as scmUnload
 from yihutils import rectifyString as rectifyString
 from yihutils import delTree as delTree
 from yihutils import uefiBuild as uefiBuild
@@ -126,9 +126,14 @@ archiveDir = archiveRootDir + "\\" + BUILDID + "-" + BUILDVERSION + "_" + Platfo
 logging.debug("new directory to archive build input and output: " + archiveDir)
 print "archiveDir " + archiveDir
 
+logging.debug("-> starts archiving uEFI build")
 archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
+logging.debug("<- ends archiving uEFI build")
 
+logging.debug("-> scmUnloadAtTheEnd:" + str(scmUnloadAtTheEnd))
 if scmUnloadAtTheEnd == True:
+    logging.debug("-> starts scm unload")
     scmUnload(scmExe, SandBox, RepoWS)
+    logging.debug("<- ends scm unload")
 #beep to notify    
 winsound.Beep(440, 250)
