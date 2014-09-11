@@ -8,6 +8,7 @@ from yihutils import delTree as delTree
 from yihutils import uefiBuild as uefiBuild
 from yihutils import archiveBuild as archiveBuild
 from yihutils import ensureFileExists as ensureFileExists
+from yihutils import platformInfoRetrieval as platformInfoRetrieval
 
 logging.basicConfig(filename='yih.log',level=logging.DEBUG)
 logging.info("\n---------------------------------------------")
@@ -91,14 +92,26 @@ if not strSystemIniFile == "":
     config.read(strSystemIniFile)
     pythonExe = config.get("system", "pythonExe")
     scmExe = config.get("system", "scmExe")
+    aslDir = config.get("system", "aslDir")
 ## compose a python directory to contain parameters
 direcSys = { 
 'pythonExe' : pythonExe,
-'scmExe' : scmExe
+'scmExe' : scmExe,
+'aslDir' : aslDir
 }
 
 logging.debug("direcSys")
 logging.debug(direcSys)
+
+# retrieve platform dependent info:
+direcPlatform = platformInfoRetrieval(strPlatform)
+#buildOutputSubDirectoryPrefix = "\\Build\\\BricklandPkg\\DEBUG_"
+#aslExe = "C:\\ASL_Brickland\\iasl.exe"    
+#buildScript = "BricklandPkg\PlatformBuild.py"
+
+buildOutputSubDirectoryPrefix = direcPlatform['buildOutputSubDirectoryPrefix']
+aslExe = direcPlatform['aslExe']    
+buildScript = direcPlatform['buildScript']
 
 ## clean up build directory to make sure a clean build
 outputDir=strSandBox.decode('string_escape') + "\\Build\\"
@@ -106,15 +119,17 @@ logging.debug("cleaning up build output directory: " + outputDir)
 delTree(outputDir)
 
 ## copy iasl.exe per platform 
-if strPlatform == "Grantley": 
-    logging.debug("copy iasl.exe to C:\ASL for Grantley build")
-    shutil.copy("C:\\ASL_Grantley\\iasl.exe", "C:\\ASL\\")
-elif strPlatform == "Brickland":
-    logging.debug("copy iasl.exe to C:\ASL for Brickland build")
-    shutil.copy("C:\\ASL_Brickland\\iasl.exe", "C:\\ASL\\")
-else: 
-    logging.critical("unknown platform was found!")
-    print "error!"
+shutil.copy(aslExe, aslDir)
+
+####if strPlatform == "Grantley": 
+####    logging.debug("copy iasl.exe to C:\ASL for Grantley build")
+####    shutil.copy("C:\\ASL_Grantley\\iasl.exe", "C:\\ASL\\")
+####elif strPlatform == "Brickland":
+####    logging.debug("copy iasl.exe to C:\ASL for Brickland build")
+####    shutil.copy("C:\\ASL_Brickland\\iasl.exe", "C:\\ASL\\")
+####else: 
+####    logging.critical("unknown platform was found!")
+####    print "error!"
 
 ## scm load local sandbox
 logging.info("->start scm load local sandbox")
@@ -125,7 +140,7 @@ logging.info("<- end scm load local sandbox")
 
 #cache the current working directory before change directory to sandbox
 workingDir=os.getcwd()
-logging.debug("cache current working directory: ", workingDir)
+logging.debug("cache current working directory: " + workingDir)
 
 #change directory to sandbox
 logging.debug("before rectification : "  + strSandBox)
@@ -134,7 +149,7 @@ logging.debug("after rectification : "  + strSandBox)
 os.chdir(strSandBox)
 
 logging.debug("->start uefi build")
-uefiBuild(pythonExe, "PlatformPkg\\PlatformBuild.py", direc['strBUILDID'], direc['strBUILDDATE'], direc['strBUILDVERSION'], direc['strTOOL_CHAIN_TAG'])
+uefiBuild(pythonExe, buildScript, direc['strBUILDID'], direc['strBUILDDATE'], direc['strBUILDVERSION'], direc['strTOOL_CHAIN_TAG'])
 logging.debug("<- end uefi build")
 
 #archiveDir = workingDir + "\\" + strBUILDID + "-" + strBUILDVERSION + "_" + strPlatform + "_archivedAt_" + datetime.datetime.now().strftime("%Y-%m-%d-%H%M_%S")

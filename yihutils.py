@@ -81,13 +81,16 @@ def platformInfoRetrieval(strPlatform):
     logging.info("--> enters platformInfoRetrieval function")
     buildOutputSubDirectoryPrefix = ''
     aslExe = ''
+    buildScript = ''
     if strPlatform == "Grantley": 
         buildOutputSubDirectoryPrefix = "\\Build\\PlatformPkg\\DEBUG_"
         aslExe = "C:\\ASL_Grantley\\iasl.exe"
+        buildScript = "PlatformPkg\\PlatformBuild.py"
     elif strPlatform == "Brickland":
         buildOutputSubDirectoryPrefix = "\\Build\\\BricklandPkg\\DEBUG_"
         aslExe = "C:\\ASL_Brickland\\iasl.exe"	
-    direc = {'buildOutputSubDirectoryPrefix' : buildOutputSubDirectoryPrefix, 'aslExe' : aslExe}
+        buildScript = "BricklandPkg\PlatformBuild.py"
+    direc = {'buildOutputSubDirectoryPrefix' : buildOutputSubDirectoryPrefix, 'aslExe' : aslExe, 'buildScript': buildScript}
     logging.info("<-- exits platformInfoRetrieval function")
     return direc
 
