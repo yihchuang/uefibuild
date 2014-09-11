@@ -1,14 +1,5 @@
 import os, ConfigParser, shutil, logging, subprocess
 
-#class BraceMessage(object):
-#    def __init__(self, fmt, *args, **kwargs):
-#        self.fmt = fmt
-#        self.args = args
-#        self.kwargs = kwargs
-#
-#    def __str__(self):
-#        return self.fmt.format(*self.args, **self.kwargs)
-
 def delTree(f):
     d = os.path.dirname(f)
     if os.path.exists(d):
@@ -66,23 +57,27 @@ def archiveBuild(targetDir, strBuildIniFile, srcImageFile):
     logging.info("<-- exits archiveBuild function")
     return
 
-def platformInfoRetrieval(Platform):
+def platformInfoRetrieval(Platform, SandBox, TOOL_CHAIN_TAG, BUILDID):
     "platform info retrieval"
     logging.info("--> enters platformInfoRetrieval function")
     buildOutputSubDirectoryPrefix = ''
     aslExe = ''
     buildScript = ''
+    srcImageFile = ''
     if Platform == "Grantley": 
         buildOutputSubDirectoryPrefix = "\\Build\\PlatformPkg\\DEBUG_"
         aslExe = "C:\\ASL_Grantley\\iasl.exe"
         buildScript = "PlatformPkg\\PlatformBuild.py"
+        srcImageFile=SandBox.decode('string_escape') + "\\Build\\PlatformPkg\\DEBUG_" + TOOL_CHAIN_TAG + "\\FV\\" + BUILDID + ".upd"
     elif Platform == "Brickland":
         buildOutputSubDirectoryPrefix = "\\Build\\\BricklandPkg\\DEBUG_"
         aslExe = "C:\\ASL_Brickland\\iasl.exe"	
         buildScript = "BricklandPkg\PlatformBuild.py"
-    direcBuild = {'buildOutputSubDirectoryPrefix' : buildOutputSubDirectoryPrefix, 'aslExe' : aslExe, 'buildScript': buildScript}
+        srcImageFile=SandBox.decode('string_escape') + "\\Build\\\BricklandPkg\\DEBUG_" + TOOL_CHAIN_TAG + "\\FV\\" + BUILDID + ".upd"
+    direcPlatform = {'buildOutputSubDirectoryPrefix' : buildOutputSubDirectoryPrefix, 'aslExe' : aslExe, 
+                     'srcImageFile' : srcImageFile, 'buildScript': buildScript}
     logging.info("<-- exits platformInfoRetrieval function")
-    return direcBuild
+    return direcPlatform
 
 def ensureFileExists(fileName):
     "ensure input file does exist, or raise exception"
