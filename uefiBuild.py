@@ -9,6 +9,8 @@ from yihutils import uefiBuild as uefiBuild
 from yihutils import archiveBuild as archiveBuild
 from yihutils import ensureFileExists as ensureFileExists
 from yihutils import platformInfoRetrieval as platformInfoRetrieval
+from yihutils import packageupBuildInput as packageupBuildInput
+from yihutils import packageupSystemInput as packageupSystemInput
 
 logging.basicConfig(filename='yih.log',level=logging.DEBUG)
 logging.info("\n---------------------------------------------")
@@ -41,11 +43,11 @@ def main(argv):
             systemIniFile = arg
     print 'Build ini file is: ', buildIniFile
     print 'System ini file is: ', systemIniFile
-    direc = {
+    direcBuild = {
     'buildIniFile' : buildIniFile,
     'systemIniFile' : systemIniFile
     }
-    return direc 
+    return direcBuild 
 
 direcIni = {}
 if __name__ == "__main__":
@@ -57,114 +59,79 @@ logging.debug(direcIni)
 strBuildIniFile = direcIni['buildIniFile']
 logging.debug("strBuildIniFile: " + strBuildIniFile)
 ensureFileExists(strBuildIniFile)
-config = ConfigParser.ConfigParser()
-config.sections()
-config.read(strBuildIniFile)
-strBUILDID = config.get("build", "BUILDID")
-strBUILDDATE = config.get("build", "BUILDDATE")
-strBUILDVERSION = config.get("build", "BUILDVERSION")
-strTOOL_CHAIN_TAG = config.get("build", "TOOL_CHAIN_TAG")
-strPlatform = config.get("build", "Platform")
-strSandBox = config.get("Jazz sm", "SandBox")
 
-strRepoWS = config.get("Jazz sm", "RepositoyWorkSpaceName")
-## compose a python directory to contain parameters
-direc = { 
-'strBuildIniFile' : strBuildIniFile,
-'strBUILDID' : strBUILDID,
-'strBUILDDATE' : strBUILDDATE,
-'strBUILDVERSION' : strBUILDVERSION,
-'strTOOL_CHAIN_TAG' : strTOOL_CHAIN_TAG,
-'strPlatform' : strPlatform,
-'strSandBox' : strSandBox,
-'strRepoWS' : strRepoWS
-}
+direcBuild = packageupBuildInput(strBuildIniFile)
+logging.debug(direcBuild)
+BUILDID = direcBuild['BUILDID']
+BUILDDATE = direcBuild['BUILDDATE']
+BUILDVERSION = direcBuild['BUILDVERSION']
+TOOL_CHAIN_TAG = direcBuild['TOOL_CHAIN_TAG']
+Platform = direcBuild['Platform']
+SandBox = direcBuild['SandBox']
+RepoWS = direcBuild['RepositoyWorkSpaceName']
 
-logging.debug(direc)
 
 ## configure system settings
 strSystemIniFile = direcIni['systemIniFile']
 if not strSystemIniFile == "":
     ensureFileExists(strSystemIniFile)
     logging.debug("strSystemIniFile: " + strSystemIniFile)
-    config = ConfigParser.ConfigParser()
-    config.sections()
-    config.read(strSystemIniFile)
-    pythonExe = config.get("system", "pythonExe")
-    scmExe = config.get("system", "scmExe")
-    aslDir = config.get("system", "aslDir")
-## compose a python directory to contain parameters
-direcSys = { 
-'pythonExe' : pythonExe,
-'scmExe' : scmExe,
-'aslDir' : aslDir
-}
+    direcSystem = packageupSystemInput(strSystemIniFile)
+    logging.debug("direcSystem: " + str(direcSystem))
+    if not direcSystem['pythonExe'] == '':
+        pythonExe = direcSystem['pythonExe']
 
-logging.debug("direcSys")
-logging.debug(direcSys)
+    if not direcSystem['scmExe'] == '':
+        scmExe = direcSystem['scmExe']
+
+    if not direcSystem['aslDir'] == '':
+        aslDir = direcSystem['aslDir']
 
 # retrieve platform dependent info:
-direcPlatform = platformInfoRetrieval(strPlatform)
-#buildOutputSubDirectoryPrefix = "\\Build\\\BricklandPkg\\DEBUG_"
-#aslExe = "C:\\ASL_Brickland\\iasl.exe"    
-#buildScript = "BricklandPkg\PlatformBuild.py"
-
+direcPlatform = platformInfoRetrieval(direcBuild['Platform'])
 buildOutputSubDirectoryPrefix = direcPlatform['buildOutputSubDirectoryPrefix']
 aslExe = direcPlatform['aslExe']    
 buildScript = direcPlatform['buildScript']
 
 ## clean up build directory to make sure a clean build
-outputDir=strSandBox.decode('string_escape') + "\\Build\\"
+outputDir=SandBox.decode('string_escape') + "\\Build\\"
 logging.debug("cleaning up build output directory: " + outputDir)
 delTree(outputDir)
 
 ## copy iasl.exe per platform 
 shutil.copy(aslExe, aslDir)
 
-####if strPlatform == "Grantley": 
-####    logging.debug("copy iasl.exe to C:\ASL for Grantley build")
-####    shutil.copy("C:\\ASL_Grantley\\iasl.exe", "C:\\ASL\\")
-####elif strPlatform == "Brickland":
-####    logging.debug("copy iasl.exe to C:\ASL for Brickland build")
-####    shutil.copy("C:\\ASL_Brickland\\iasl.exe", "C:\\ASL\\")
-####else: 
-####    logging.critical("unknown platform was found!")
-####    print "error!"
-
 ## scm load local sandbox
-logging.info("->start scm load local sandbox")
-load(scmExe, direc['strSandBox'], direc['strRepoWS'])
-logging.info("<- end scm load local sandbox")
-#TODO: need to check error to make sure enlist completes successfully
-## end of scm load
+logging.info("-> starts scm load local sandbox")
+load(scmExe, SandBox, RepoWS)
+logging.info("<- ends scm load local sandbox")
 
 #cache the current working directory before change directory to sandbox
 workingDir=os.getcwd()
 logging.debug("cache current working directory: " + workingDir)
 
 #change directory to sandbox
-logging.debug("before rectification : "  + strSandBox)
-strSandBox = rectifyString(strSandBox)
-logging.debug("after rectification : "  + strSandBox)
-os.chdir(strSandBox)
+logging.debug("before rectification : "  + SandBox)
+SandBox = rectifyString(SandBox)
+logging.debug("after rectification : "  + SandBox)
+os.chdir(SandBox)
 
-logging.debug("->start uefi build")
-uefiBuild(pythonExe, buildScript, direc['strBUILDID'], direc['strBUILDDATE'], direc['strBUILDVERSION'], direc['strTOOL_CHAIN_TAG'])
-logging.debug("<- end uefi build")
+logging.debug("-> starts uEFI build")
+uefiBuild(pythonExe, buildScript, direcBuild['BUILDID'], direcBuild['BUILDDATE'], direcBuild['BUILDVERSION'], direcBuild['TOOL_CHAIN_TAG'])
+logging.debug("<- ends uEFI build")
 
-#archiveDir = workingDir + "\\" + strBUILDID + "-" + strBUILDVERSION + "_" + strPlatform + "_archivedAt_" + datetime.datetime.now().strftime("%Y-%m-%d-%H%M_%S")
-archiveDir = archiveRootDir + "\\" + strBUILDID + "-" + strBUILDVERSION + "_" + strPlatform + "_archivedAt_" + datetime.datetime.now().strftime("%Y-%m-%d-%H%M_%S")
+archiveDir = archiveRootDir + "\\" + BUILDID + "-" + BUILDVERSION + "_" + Platform + "_archivedAt_" + datetime.datetime.now().strftime("%Y-%m-%d-%H%M_%S")
 logging.debug("new directory to archive build input and output: " + archiveDir)
 print "archiveDir " + archiveDir
-if strPlatform == "Grantley": 
+if Platform == "Grantley": 
     print "archiveGrantley"
-    srcImageFile=strSandBox.decode('string_escape') + "\\Build\\PlatformPkg\\DEBUG_" + strTOOL_CHAIN_TAG + "\\FV\\" + strBUILDID + ".upd"
+    srcImageFile=SandBox.decode('string_escape') + "\\Build\\PlatformPkg\\DEBUG_" + TOOL_CHAIN_TAG + "\\FV\\" + BUILDID + ".upd"
     logging.debug("save build output file: " + srcImageFile)
     print "srcImageFile: " + srcImageFile
     archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
-elif strPlatform == "Brickland":
+elif Platform == "Brickland":
         print "archiveBrickland"
-        srcImageFile=strSandBox.decode('string_escape') + "\\Build\\\BricklandPkg\\DEBUG_" + strTOOL_CHAIN_TAG + "\\FV\\" + strBUILDID + ".upd"
+        srcImageFile=SandBox.decode('string_escape') + "\\Build\\\BricklandPkg\\DEBUG_" + TOOL_CHAIN_TAG + "\\FV\\" + BUILDID + ".upd"
         logging.debug("save build output file: " + srcImageFile)
         print "srcImageFile: " + srcImageFile
         archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
