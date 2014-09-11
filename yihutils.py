@@ -1,8 +1,4 @@
-import os
-import winsound
-import shutil
-import logging
-import subprocess
+import os, ConfigParser, shutil, logging, subprocess
 
 #class BraceMessage(object):
 #    def __init__(self, fmt, *args, **kwargs):
@@ -17,12 +13,6 @@ def delTree(f):
     d = os.path.dirname(f)
     if os.path.exists(d):
         shutil.rmtree(d)
-    return
-
-def winBeep():
-    Freq = 2500 # Set Frequency To 2500 Hertz
-    Dur = 1000 # Set Duration To 1000 ms == 1 second
-    winsound.Beep(Freq,Dur)
     return
 
 def rectifyList(_list):
@@ -40,23 +30,23 @@ def rectifyString(_str):
     logging.info("<-- exits rectifyString function")
     return _str
 
-def uefiBuild(pythonExe, buildScript, strBUILDID, strBUILDDATE, strBUILDVERSION, strTOOL_CHAIN_TAG):
+def uefiBuild(pythonExe, buildScript, BUILDID, BUILDDATE, BUILDVERSION, TOOL_CHAIN_TAG):
     "uefi build"
     print "pythonExe: " + pythonExe
     print "buildScript: " + buildScript
-    print "strBUILDID: " + strBUILDID
-    print "strBUILDDATE: " + strBUILDDATE
-    print "strBUILDVERSION: " + strBUILDVERSION
-    print "strTOOL_CHAIN_TAG: " + strTOOL_CHAIN_TAG
+    print "BUILDID: " + BUILDID
+    print "BUILDDATE: " + BUILDDATE
+    print "BUILDVERSION: " + BUILDVERSION
+    print "TOOL_CHAIN_TAG: " + TOOL_CHAIN_TAG
 
     logging.info("--> enters uefiBuild function")
     runCmd = []
     runCmd.append(pythonExe)
     runCmd.append(buildScript)
-    runCmd.append("BUILDID=" + strBUILDID)  
-    runCmd.append("BUILDDATE=" + strBUILDDATE)  
-    runCmd.append("BUILDVERSION=" + strBUILDVERSION)
-    runCmd.append("TOOL_CHAIN_TAG=" + strTOOL_CHAIN_TAG)
+    runCmd.append("BUILDID=" + BUILDID)  
+    runCmd.append("BUILDDATE=" + BUILDDATE)  
+    runCmd.append("BUILDVERSION=" + BUILDVERSION)
+    runCmd.append("TOOL_CHAIN_TAG=" + TOOL_CHAIN_TAG)
     logging.debug("runCmd to build:")
     logging.debug(runCmd)
     print runCmd
@@ -76,23 +66,23 @@ def archiveBuild(targetDir, strBuildIniFile, srcImageFile):
     logging.info("<-- exits archiveBuild function")
     return
 
-def platformInfoRetrieval(strPlatform):
+def platformInfoRetrieval(Platform):
     "platform info retrieval"
     logging.info("--> enters platformInfoRetrieval function")
     buildOutputSubDirectoryPrefix = ''
     aslExe = ''
     buildScript = ''
-    if strPlatform == "Grantley": 
+    if Platform == "Grantley": 
         buildOutputSubDirectoryPrefix = "\\Build\\PlatformPkg\\DEBUG_"
         aslExe = "C:\\ASL_Grantley\\iasl.exe"
         buildScript = "PlatformPkg\\PlatformBuild.py"
-    elif strPlatform == "Brickland":
+    elif Platform == "Brickland":
         buildOutputSubDirectoryPrefix = "\\Build\\\BricklandPkg\\DEBUG_"
         aslExe = "C:\\ASL_Brickland\\iasl.exe"	
         buildScript = "BricklandPkg\PlatformBuild.py"
-    direc = {'buildOutputSubDirectoryPrefix' : buildOutputSubDirectoryPrefix, 'aslExe' : aslExe, 'buildScript': buildScript}
+    direcBuild = {'buildOutputSubDirectoryPrefix' : buildOutputSubDirectoryPrefix, 'aslExe' : aslExe, 'buildScript': buildScript}
     logging.info("<-- exits platformInfoRetrieval function")
-    return direc
+    return direcBuild
 
 def ensureFileExists(fileName):
     "ensure input file does exist, or raise exception"
@@ -100,3 +90,17 @@ def ensureFileExists(fileName):
         logging.debug(fileName + " was not found.")
         raise ValueError(fileName + " was not found.")
     return
+
+def packageupBuildInput(buildIniFile):
+    config = ConfigParser.SafeConfigParser()  
+    config.optionxform = str
+    config.read(buildIniFile)
+    direcBuild = dict(config.items('build') + config.items('Jazz sm'))
+    return direcBuild
+
+def packageupSystemInput(systemIniFile):
+    config = ConfigParser.SafeConfigParser()  
+    config.optionxform = str
+    config.read(systemIniFile)
+    direcSystem = dict(config.items('system'))
+    return direcSystem
