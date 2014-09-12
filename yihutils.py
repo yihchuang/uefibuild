@@ -105,14 +105,15 @@ def packageupSystemInput(systemIniFile):
     logging.info("<-- exits packageupSystemInput function")
     return dictSystem
 
-def addToMongoDb(dictBuild, dictSystem, dictPlatform):
+def addToMongoDb(dictBuild, archiveDir):
     logging.info("--> enters addToMongoDb function")
     client = MongoClient()
-    db = client.mydb
+    db = client.uefibuild
     posts = db.posts
-    newRecord = dict(dictBuild.items() + dictSystem.items() + dictPlatform.items())
-    logging.debug("newRecord to add to mongoDB: " + str(newRecord))
-    post_id = posts.insert(newRecord)
+    newRecordToAddToDB = dictBuild.items() 
+    newRecordToAddToDB['archiveDir'] = archiveDir
+    logging.debug("newRecord to add to mongoDB: " + str(newRecordToAddToDB))
+    post_id = posts.insert(newRecordToAddToDB)
     print post_id
     logging.info("<-- exits addToMongoDb function")
     return

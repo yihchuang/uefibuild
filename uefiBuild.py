@@ -15,7 +15,8 @@ from yihutils import addToMongoDb as addToMongoDb
 
 logging.basicConfig(filename='yih.log',level=logging.DEBUG)
 logging.info("\n---------------------------------------------")
-logging.info(datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S"))
+startTime = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+logging.info("startTime:" + str(startTime))
 
 # pre-set but can be overridden if system.ini is input.
 pythonExe="C:\\Python27\\python.exe"
@@ -132,7 +133,7 @@ archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
 logging.debug("<- ends archiving uEFI build")
 
 logging.debug("-> starts updating mongoDB")
-addToMongoDb(dictBuild, dictSystem, dictPlatform)
+addToMongoDb(dictBuild, dictSystem, dictPlatform, archiveDir)
 logging.debug("-> ends updating mongoDB")
 
 logging.debug("-> scmUnloadAtTheEnd:" + str(scmUnloadAtTheEnd))
@@ -140,5 +141,11 @@ if scmUnloadAtTheEnd == True:
     logging.debug("-> starts scm unload")
     scmUnload(scmExe, SandBox, RepoWS)
     logging.debug("<- ends scm unload")
+##end of script
+endTime = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+logging.info("endTime:" + str(endTime))
+logging.info("elpsed time:" + str(endTime - startTime))
+
+    
 #beep to notify    
 winsound.Beep(440, 250)
