@@ -110,10 +110,9 @@ def addToMongoDb(dictBuild, archiveDir):
     client = MongoClient()
     db = client.uefibuild
     posts = db.posts
-    newRecordToAddToDB = dictBuild.items() 
+    newRecordToAddToDB = dictBuild 
     newRecordToAddToDB['archiveDir'] = archiveDir
     logging.debug("newRecord to add to mongoDB: " + str(newRecordToAddToDB))
     post_id = posts.insert(newRecordToAddToDB)
-    print post_id
     logging.info("<-- exits addToMongoDb function")
     return

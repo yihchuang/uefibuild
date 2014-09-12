@@ -15,7 +15,7 @@ from yihutils import addToMongoDb as addToMongoDb
 
 logging.basicConfig(filename='yih.log',level=logging.DEBUG)
 logging.info("\n---------------------------------------------")
-startTime = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+startTime = datetime.datetime.now()
 logging.info("startTime:" + str(startTime))
 
 # pre-set but can be overridden if system.ini is input.
@@ -133,7 +133,7 @@ archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
 logging.debug("<- ends archiving uEFI build")
 
 logging.debug("-> starts updating mongoDB")
-addToMongoDb(dictBuild, dictSystem, dictPlatform, archiveDir)
+addToMongoDb(dictBuild, archiveDir)
 logging.debug("-> ends updating mongoDB")
 
 logging.debug("-> scmUnloadAtTheEnd:" + str(scmUnloadAtTheEnd))
@@ -142,7 +142,7 @@ if scmUnloadAtTheEnd == True:
     scmUnload(scmExe, SandBox, RepoWS)
     logging.debug("<- ends scm unload")
 ##end of script
-endTime = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+endTime = datetime.datetime.now()
 logging.info("endTime:" + str(endTime))
 logging.info("elpsed time:" + str(endTime - startTime))
 
