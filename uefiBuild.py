@@ -11,6 +11,7 @@ from yihutils import ensureFileExists as ensureFileExists
 from yihutils import platformInfoRetrieval as platformInfoRetrieval
 from yihutils import packageupBuildInput as packageupBuildInput
 from yihutils import packageupSystemInput as packageupSystemInput
+from yihutils import addToMongoDb as addToMongoDb
 
 logging.basicConfig(filename='yih.log',level=logging.DEBUG)
 logging.info("\n---------------------------------------------")
@@ -44,56 +45,56 @@ def main(argv):
             systemIniFile = arg
     print 'Build ini file is: ', buildIniFile
     print 'System ini file is: ', systemIniFile
-    direcBuild = {
+    dictBuild = {
     'buildIniFile' : buildIniFile,
     'systemIniFile' : systemIniFile
     }
-    return direcBuild 
+    return dictBuild 
 
-direcIni = {}
+dictIni = {}
 if __name__ == "__main__":
-    direcIni = main(sys.argv[1:])
+    dictIni = main(sys.argv[1:])
 
-logging.debug("direcIni:")
-logging.debug(direcIni)
+logging.debug("dictIni:")
+logging.debug(dictIni)
 
-strBuildIniFile = direcIni['buildIniFile']
+strBuildIniFile = dictIni['buildIniFile']
 logging.debug("strBuildIniFile: " + strBuildIniFile)
 ensureFileExists(strBuildIniFile)
 
-direcBuild = packageupBuildInput(strBuildIniFile)
-logging.debug(direcBuild)
-BUILDID = direcBuild['BUILDID']
-BUILDDATE = direcBuild['BUILDDATE']
-BUILDVERSION = direcBuild['BUILDVERSION']
-TOOL_CHAIN_TAG = direcBuild['TOOL_CHAIN_TAG']
-Platform = direcBuild['Platform']
-SandBox = direcBuild['SandBox']
-RepoWS = direcBuild['RepositoyWorkSpaceName']
+dictBuild = packageupBuildInput(strBuildIniFile)
+logging.debug(dictBuild)
+BUILDID = dictBuild['BUILDID']
+BUILDDATE = dictBuild['BUILDDATE']
+BUILDVERSION = dictBuild['BUILDVERSION']
+TOOL_CHAIN_TAG = dictBuild['TOOL_CHAIN_TAG']
+Platform = dictBuild['Platform']
+SandBox = dictBuild['SandBox']
+RepoWS = dictBuild['RepositoyWorkSpaceName']
 
 
 ## configure system settings
-strSystemIniFile = direcIni['systemIniFile']
+strSystemIniFile = dictIni['systemIniFile']
 if not strSystemIniFile == "":
     ensureFileExists(strSystemIniFile)
     logging.debug("strSystemIniFile: " + strSystemIniFile)
-    direcSystem = packageupSystemInput(strSystemIniFile)
-    logging.debug("direcSystem: " + str(direcSystem))
-    if not direcSystem['pythonExe'] == '':
-        pythonExe = direcSystem['pythonExe']
+    dictSystem = packageupSystemInput(strSystemIniFile)
+    logging.debug("dictSystem: " + str(dictSystem))
+    if not dictSystem['pythonExe'] == '':
+        pythonExe = dictSystem['pythonExe']
 
-    if not direcSystem['scmExe'] == '':
-        scmExe = direcSystem['scmExe']
+    if not dictSystem['scmExe'] == '':
+        scmExe = dictSystem['scmExe']
 
-    if not direcSystem['aslDir'] == '':
-        aslDir = direcSystem['aslDir']
+    if not dictSystem['aslDir'] == '':
+        aslDir = dictSystem['aslDir']
 
 # retrieve platform dependent info:
-direcPlatform = platformInfoRetrieval(direcBuild['Platform'], direcBuild['SandBox'], direcBuild['TOOL_CHAIN_TAG'], direcBuild['BUILDID'])
-buildOutputSubDirectoryPrefix = direcPlatform['buildOutputSubDirectoryPrefix']
-aslExe = direcPlatform['aslExe']    
-buildScript = direcPlatform['buildScript']
-srcImageFile = direcPlatform['srcImageFile']
+dictPlatform = platformInfoRetrieval(dictBuild['Platform'], dictBuild['SandBox'], dictBuild['TOOL_CHAIN_TAG'], dictBuild['BUILDID'])
+buildOutputSubDirectoryPrefix = dictPlatform['buildOutputSubDirectoryPrefix']
+aslExe = dictPlatform['aslExe']    
+buildScript = dictPlatform['buildScript']
+srcImageFile = dictPlatform['srcImageFile']
 
 ## clean up build directory to make sure a clean build
 outputDir=SandBox.decode('string_escape') + "\\Build\\"
@@ -119,7 +120,7 @@ logging.debug("after rectification : "  + SandBox)
 os.chdir(SandBox)
 
 logging.debug("-> starts uEFI build")
-uefiBuild(pythonExe, buildScript, direcBuild['BUILDID'], direcBuild['BUILDDATE'], direcBuild['BUILDVERSION'], direcBuild['TOOL_CHAIN_TAG'])
+uefiBuild(pythonExe, buildScript, dictBuild['BUILDID'], dictBuild['BUILDDATE'], dictBuild['BUILDVERSION'], dictBuild['TOOL_CHAIN_TAG'])
 logging.debug("<- ends uEFI build")
 
 archiveDir = archiveRootDir + "\\" + BUILDID + "-" + BUILDVERSION + "_" + Platform + "_archivedAt_" + datetime.datetime.now().strftime("%Y-%m-%d-%H%M_%S")
@@ -129,6 +130,10 @@ print "archiveDir " + archiveDir
 logging.debug("-> starts archiving uEFI build")
 archiveBuild(archiveDir, strBuildIniFile, srcImageFile)
 logging.debug("<- ends archiving uEFI build")
+
+logging.debug("-> starts updating mongoDB")
+addToMongoDb(dictBuild, dictSystem, dictPlatform)
+logging.debug("-> ends updating mongoDB")
 
 logging.debug("-> scmUnloadAtTheEnd:" + str(scmUnloadAtTheEnd))
 if scmUnloadAtTheEnd == True:

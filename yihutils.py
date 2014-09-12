@@ -1,4 +1,5 @@
 import os, ConfigParser, shutil, logging, subprocess
+from pymongo import MongoClient
 
 def delTree(f):
     d = os.path.dirname(f)
@@ -8,17 +9,17 @@ def delTree(f):
 
 def rectifyList(_list):
     "rectify input _list to decode (remove) escape character"
-    logging.info("--> enters rectifyList function")
+    #logging.info("--> enters rectifyList function")
     for i in range(len(_list)):
         _list[i] = _list[i].decode('string_escape')        
-    logging.info("<-- exits rectifyList function")
+    #logging.info("<-- exits rectifyList function")
     return _list
 
 def rectifyString(_str):
     "rectify input string to decode (remove) escape character"
-    logging.info("--> enters rectify function")
+    #logging.info("--> enters rectify function")
     _str = _str.decode('string_escape')
-    logging.info("<-- exits rectifyString function")
+    #logging.info("<-- exits rectifyString function")
     return _str
 
 def uefiBuild(pythonExe, buildScript, BUILDID, BUILDDATE, BUILDVERSION, TOOL_CHAIN_TAG):
@@ -74,10 +75,10 @@ def platformInfoRetrieval(Platform, SandBox, TOOL_CHAIN_TAG, BUILDID):
         aslExe = "C:\\ASL_Brickland\\iasl.exe"	
         buildScript = "BricklandPkg\PlatformBuild.py"
         srcImageFile=SandBox.decode('string_escape') + "\\Build\\\BricklandPkg\\DEBUG_" + TOOL_CHAIN_TAG + "\\FV\\" + BUILDID + ".upd"
-    direcPlatform = {'buildOutputSubDirectoryPrefix' : buildOutputSubDirectoryPrefix, 'aslExe' : aslExe, 
+    dictPlatform = {'buildOutputSubDirectoryPrefix' : buildOutputSubDirectoryPrefix, 'aslExe' : aslExe, 
                      'srcImageFile' : srcImageFile, 'buildScript': buildScript}
     logging.info("<-- exits platformInfoRetrieval function")
-    return direcPlatform
+    return dictPlatform
 
 def ensureFileExists(fileName):
     "ensure input file does exist, or raise exception"
@@ -87,15 +88,31 @@ def ensureFileExists(fileName):
     return
 
 def packageupBuildInput(buildIniFile):
+    logging.info("--> enters packageupBuildInput function")
     config = ConfigParser.SafeConfigParser()  
     config.optionxform = str
     config.read(buildIniFile)
-    direcBuild = dict(config.items('build') + config.items('Jazz sm'))
-    return direcBuild
+    dictBuild = dict(config.items('build') + config.items('Jazz sm') + config.items('meta'))
+    logging.info("<-- exits packageupBuildInput function")
+    return dictBuild
 
 def packageupSystemInput(systemIniFile):
+    logging.info("--> enters packageupSystemInput function")
     config = ConfigParser.SafeConfigParser()  
     config.optionxform = str
     config.read(systemIniFile)
-    direcSystem = dict(config.items('system'))
-    return direcSystem
+    dictSystem = dict(config.items('system'))
+    logging.info("<-- exits packageupSystemInput function")
+    return dictSystem
+
+def addToMongoDb(dictBuild, dictSystem, dictPlatform):
+    logging.info("--> enters addToMongoDb function")
+    client = MongoClient()
+    db = client.mydb
+    posts = db.posts
+    newRecord = dict(dictBuild.items() + dictSystem.items() + dictPlatform.items())
+    logging.debug("newRecord to add to mongoDB: " + str(newRecord))
+    post_id = posts.insert(newRecord)
+    print post_id
+    logging.info("<-- exits addToMongoDb function")
+    return
