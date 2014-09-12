@@ -108,11 +108,16 @@ def packageupSystemInput(systemIniFile):
 def addToMongoDb(dictBuild, archiveDir):
     logging.info("--> enters addToMongoDb function")
     client = MongoClient()
-    db = client.uefibuild
-    posts = db.posts
-    newRecordToAddToDB = dictBuild 
+    db = client.uefi
+    buildCollection = db.build
+    newRecordToAddToDB = dictBuild
+    del newRecordToAddToDB['TOOL_CHAIN_TAG']
+    del newRecordToAddToDB['SandBox']
+    del newRecordToAddToDB['RepositoyWorkSpaceName']
     newRecordToAddToDB['archiveDir'] = archiveDir
     logging.debug("newRecord to add to mongoDB: " + str(newRecordToAddToDB))
-    post_id = posts.insert(newRecordToAddToDB)
+    post_id = buildCollection.insert(newRecordToAddToDB)
+    logging.debug("post_id: " + str(post_id))
+    client.close()
     logging.info("<-- exits addToMongoDb function")
     return
