@@ -1,6 +1,9 @@
 import os, ConfigParser, shutil, logging, subprocess
 from pymongo import MongoClient
 
+dbName = "uefi"
+dbCollectionName = "build"
+
 def delTree(f):
     d = os.path.dirname(f)
     if os.path.exists(d):
@@ -105,6 +108,20 @@ def packageupSystemInput(systemIniFile):
     logging.info("<-- exits packageupSystemInput function")
     return dictSystem
 
+def printMongoDbCollection(dbCollection):
+    results = dbCollection.find()
+    print()
+    print('+-+-+-+-+-+-+-+-+-+-+-+-+-+-')
+
+    # display documents from collection
+    for record in results:
+        # print out the document
+        print(record)
+
+    print()
+    return
+
+
 def addToMongoDb(dictBuild, archiveDir):
     logging.info("--> enters addToMongoDb function")
     client = MongoClient()
@@ -119,5 +136,45 @@ def addToMongoDb(dictBuild, archiveDir):
     post_id = buildCollection.insert(newRecordToAddToDB)
     logging.debug("post_id: " + str(post_id))
     client.close()
+    logging.info("<-- exits addToMongoDb function")
+    return
+
+def getMongoDbCollectionClone():
+    client = MongoClient()
+    db = client.dbName
+    buildCollection = db.dbCollectionName
+    return buildCollection
+
+def removeFromMongoDbClone(archiveDir):
+    buildCollection = getMongoDbCollectionClone()
+    print buildCollection
+    recordToremoveFromDB = { "archiveDir" : archiveDir }
+    print "recordToremoveFromDB:" + str(recordToremoveFromDB)
+    print buildCollection.find(recordToremoveFromDB).count()
+    print buildCollection.remove(recordToremoveFromDB)
+    return
+    
+    return
+def addToMongoDbClone(dictBuild, archiveDir):
+    logging.info("--> enters addToMongoDb function")
+    buildCollection = getMongoDbCollectionClone()
+    print buildCollection
+    newRecordToAddToDB = dictBuild
+    if 'TOOL_CHAIN_TAG' in newRecordToAddToDB.keys():
+        del newRecordToAddToDB['TOOL_CHAIN_TAG']
+    if 'SandBox' in newRecordToAddToDB.keys():
+        del newRecordToAddToDB['SandBox']
+    if 'RepositoyWorkSpaceName' in newRecordToAddToDB.keys():
+            del newRecordToAddToDB['RepositoyWorkSpaceName']
+    newRecordToAddToDB['archiveDir'] = archiveDir
+    logging.debug("newRecord to add to mongoDB: " + str(newRecordToAddToDB))
+    #post_id = buildCollection.insert(newRecordToAddToDB)
+    post_id = buildCollection.save(newRecordToAddToDB)
+    logging.debug("post_id: " + str(post_id))
+    ##
+    printMongoDbCollection(buildCollection)
+    ##
+    
+#TODO:    client.close()
     logging.info("<-- exits addToMongoDb function")
     return
