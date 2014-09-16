@@ -95,10 +95,11 @@ buildOutputSubDirectoryPrefix = dictPlatform['buildOutputSubDirectoryPrefix']
 aslExe = dictPlatform['aslExe']    
 buildScript = dictPlatform['buildScript']
 srcImageFile = dictPlatform['srcImageFile']
-archiveDir = "C:\\myArchive\\"
+_archiveDir = "C:\\uEFI_build\\archive\\TCE101YUS-1.YC_Brickland_archivedAt_2014-09-12-1127_11"
 for i in '123':
-    _archiveDir=archiveDir + i    
-    addToMongoDbClone(dictBuild, _archiveDir)
+    #_archiveDir = rectifyString(_archiveDir) 
+    archiveDir="".join((_archiveDir, str(i)))    
+    addToMongoDbClone(dictBuild, archiveDir)
 #newRecordToAddToDB = dictBuild.items()
 #newRecordToAddToDB['archiveDir'] = archiveDir
 #print "newRecordToAddToDB: " + str(newRecordToAddToDB)

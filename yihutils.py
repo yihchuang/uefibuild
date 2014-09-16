@@ -90,6 +90,13 @@ def ensureFileExists(fileName):
         raise ValueError(fileName + " was not found.")
     return
 
+def ensureDirExists(dirName):
+    "ensure input directory does exist, or raise exception"
+    if not os.path.isdir(dirName):
+        logging.debug(dirName + " was not found.")
+        raise ValueError(dirName + " was not found.")
+    return
+
 def packageupBuildInput(buildIniFile):
     logging.info("--> enters packageupBuildInput function")
     config = ConfigParser.SafeConfigParser()  
