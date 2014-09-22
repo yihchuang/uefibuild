@@ -128,6 +128,13 @@ def printMongoDbCollection(dbCollection):
     print()
     return
 
+def getDictFromMongoDbCollection(dbCollection):
+    results = dbCollection.find()
+    dictDbCollection = {}
+    # display documents from collection
+    for record in results:
+        dictDbCollection = dict(dictDbCollection.items() + record.items())
+    return dictDbCollection
 
 def addToMongoDb(dictBuild, archiveDir):
     logging.info("--> enters addToMongoDb function")
@@ -140,7 +147,8 @@ def addToMongoDb(dictBuild, archiveDir):
     del newRecordToAddToDB['RepositoyWorkSpaceName']
     newRecordToAddToDB['archiveDir'] = archiveDir
     logging.debug("newRecord to add to mongoDB: " + str(newRecordToAddToDB))
-    post_id = buildCollection.insert(newRecordToAddToDB)
+    #post_id = buildCollection.insert(newRecordToAddToDB)
+    post_id = buildCollection.save(newRecordToAddToDB)
     logging.debug("post_id: " + str(post_id))
     client.close()
     logging.info("<-- exits addToMongoDb function")
