@@ -13,8 +13,8 @@ def delTree(f):
 def rectifyList(_list):
     "rectify input _list to decode (remove) escape character"
     #logging.info("--> enters rectifyList function")
-    for i in range(len(_list)):
-        _list[i] = _list[i].decode('string_escape')        
+    for index in range(len(_list)):
+        _list[index] = _list[index].decode('string_escape')        
     #logging.info("<-- exits rectifyList function")
     return _list
 
@@ -133,7 +133,9 @@ def getDictFromMongoDbCollection(dbCollection):
     dictDbCollection = {}
     # display documents from collection
     for record in results:
-        dictDbCollection = dict(dictDbCollection.items() + record.items())
+        _tempList = dictDbCollection.items()
+        _tempDict = dict(_tempList + record.items())
+        dictDbCollection = _tempDict
     return dictDbCollection
 
 def addToMongoDb(dictBuild, archiveDir):
@@ -193,3 +195,17 @@ def addToMongoDbClone(dictBuild, archiveDir):
 #TODO:    client.close()
     logging.info("<-- exits addToMongoDb function")
     return
+
+def iternateThroughDictionay(dictInput):
+    for key, value in dictInput.items():
+        print key, 'corresponding to ', value
+    return
+
+def getListFromMongoDbCollection(dbCollection, key):
+    results = dbCollection.find()
+    aList = []
+    for record in results:
+        value = record[key]
+        #print value
+        aList.append(value)
+    return aList

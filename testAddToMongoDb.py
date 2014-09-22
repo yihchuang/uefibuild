@@ -96,9 +96,9 @@ aslExe = dictPlatform['aslExe']
 buildScript = dictPlatform['buildScript']
 srcImageFile = dictPlatform['srcImageFile']
 _archiveDir = "C:\\uEFI_build\\archive\\TCE101YUS-1.YC_Brickland_archivedAt_2014-09-12-1127_11"
-for i in '123':
+for index in '123':
     #_archiveDir = rectifyString(_archiveDir) 
-    archiveDir="".join((_archiveDir, str(i)))    
+    archiveDir="".join((_archiveDir, str(index)))    
     addToMongoDbClone(dictBuild, archiveDir)
 #newRecordToAddToDB = dictBuild.items()
 #newRecordToAddToDB['archiveDir'] = archiveDir
