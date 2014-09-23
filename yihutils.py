@@ -209,3 +209,11 @@ def getListFromMongoDbCollection(dbCollection, key):
         #print value
         aList.append(value)
     return aList
+
+def getListOfDictFromMongoDbCollection(dbCollection):
+    results = dbCollection.find()
+    listOfDictDbCollection = []
+    # display documents from collection
+    for record in results:
+        listOfDictDbCollection.append(record)
+    return listOfDictDbCollection 
