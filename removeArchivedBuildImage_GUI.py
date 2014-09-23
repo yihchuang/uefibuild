@@ -73,7 +73,8 @@ def sel():
     _text =  radioButtonDict[var.get()]
     print _text
     selection = "You selected the option " + str(var.get())
-    label.config(text = selection)
+    #label.config(text = selection)
+    label.config(text = _text)
 
 root = Tkinter.Tk()
 var = Tkinter.IntVar()
