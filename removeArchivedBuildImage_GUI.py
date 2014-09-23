@@ -8,6 +8,7 @@ from yihutils import getDictFromMongoDbCollection as getDictFromMongoDbCollectio
 from yihutils import iternateThroughDictionay as iternateThroughDictionay
 from yihutils import getListFromMongoDbCollection as getListFromMongoDbCollection
 
+
 print 'Number of arguments:', len(sys.argv), 'arguments.'
 print 'Argument List:', str(sys.argv)
 
@@ -47,9 +48,6 @@ client = MongoClient()
 buildCollection = getMongoDbCollectionClone()
 ##
 printMongoDbCollection(buildCollection)
-
-##
-printMongoDbCollection(buildCollection)
 dictForGUI = getDictFromMongoDbCollection(buildCollection)
 iternateThroughDictionay(dictForGUI)
 
@@ -59,6 +57,16 @@ listForGUI = getListFromMongoDbCollection(buildCollection, 'archiveDir')
 ## if found existing record and successfully remove it, print: {u'ok': 1, u'n': 1}
 ## if not found existing record, print: {u'ok': 1, u'n': 0}
 ####
+
+radioButtonDict = {}
+def initGUI(listForGUI, root, var):
+    for index, value in enumerate(listForGUI):
+        radioButton = Tkinter.Radiobutton(root, text=value, value=index, variable=var, command=sel, state=Tkinter.NORMAL)
+        radioButton.grid(row=index, column=0)
+        radioButton.pack(anchor=Tkinter.W)
+        radioButtonDict.update({index:value})
+    return
+
 
 def purgeArchive():
     #append '\\' to archiveDir to prevent shutil.rmtree() wipes out the entire parent directory!
@@ -80,20 +88,23 @@ def sel():
     buttonText = "Is it OK to purge :  " + _text + "  ?"
     buttonPurge.config(text = buttonText, state=Tkinter.NORMAL)
 
+def refresh():
+    buildCollection = getMongoDbCollectionClone()
+    ##
+    printMongoDbCollection(buildCollection)
+    listForGUI = getListFromMongoDbCollection(buildCollection, 'archiveDir')
+    initGUI(listForGUI, root, var)
+    buttonPurge.config(text="Purge", state=Tkinter.DISABLED)
+    return
+
 root = Tkinter.Tk()
 var = Tkinter.IntVar()
 
-radioButtonDict = {}
-
-for index, value in enumerate(listForGUI):
-    radioButton = Tkinter.Radiobutton(root, text=value, value=index, variable=var, command=sel, state=Tkinter.NORMAL)
-    radioButton.grid(row=index, column=0)
-    radioButton.pack( anchor = Tkinter.W )
-    radioButtonDict.update({index: value})
+initGUI(listForGUI, root, var)
 
 buttonPurge = Tkinter.Button(root, text="Purge", relief='raised', command=purgeArchive, state=Tkinter.DISABLED)
 buttonPurge.pack()
-buttonRefresh = Tkinter.Button(root, text="Refresh", relief='raised')
+buttonRefresh = Tkinter.Button(root, text="Refresh", relief='raised', command=refresh)
 buttonRefresh.pack()
 label = Tkinter.Label(root)
 label.pack()
