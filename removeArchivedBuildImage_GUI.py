@@ -58,19 +58,25 @@ listForGUI = getListFromMongoDbCollection(buildCollection, 'archiveDir')
 ## if not found existing record, print: {u'ok': 1, u'n': 0}
 ####
 
-radioButtonDict = {}
-def initGUI(listForGUI, root, var):
+radioButtonMetaDict = {}
+radioButtonList = []
+def initGUI(listForGUI, frame, var):
+    for radioButton in radioButtonList:
+        radioButton.destroy()
+
     for index, value in enumerate(listForGUI):
-        radioButton = Tkinter.Radiobutton(root, text=value, value=index, variable=var, command=sel, state=Tkinter.NORMAL)
-        radioButton.grid(row=index, column=0)
+        radioButton = Tkinter.Radiobutton(frame, text=value, value=index, variable=var, command=sel, state=Tkinter.NORMAL)
+        radioButton.deselect()
+        #radioButton.grid(row=index, column=0)
         radioButton.pack(anchor=Tkinter.W)
-        radioButtonDict.update({index:value})
+        radioButtonMetaDict.update({index:value})
+        radioButtonList.append(radioButton)
     return
 
 
 def purgeArchive():
     #append '\\' to archiveDir to prevent shutil.rmtree() wipes out the entire parent directory!
-    archiveDir = radioButtonDict[var.get()]
+    archiveDir = radioButtonMetaDict[var.get()]
     buildCollection = getMongoDbCollectionClone()
     removeFromMongoDbClone(archiveDir)
     if archiveDir.endswith("\\") == False:
@@ -82,10 +88,9 @@ def purgeArchive():
 # prepare for GUI display
 def sel():
     print var.get()
-    _text =  radioButtonDict[var.get()]
+    _text =  radioButtonMetaDict[var.get()]
     print _text
-    label.config(text = _text)
-    buttonText = "Is it OK to purge :  " + _text + "  ?"
+    buttonText = "Is it OK to purge?\n" + _text
     buttonPurge.config(text = buttonText, state=Tkinter.NORMAL)
 
 def refresh():
@@ -93,21 +98,24 @@ def refresh():
     ##
     printMongoDbCollection(buildCollection)
     listForGUI = getListFromMongoDbCollection(buildCollection, 'archiveDir')
-    initGUI(listForGUI, root, var)
+    initGUI(listForGUI, frame, var)
     buttonPurge.config(text="Purge", state=Tkinter.DISABLED)
     return
 
 root = Tkinter.Tk()
 var = Tkinter.IntVar()
 
-initGUI(listForGUI, root, var)
+scollBar = Tkinter.Scrollbar(root)
+frame = Tkinter.Frame(root)
+scollBar.pack(side=Tkinter.RIGHT, fill=Tkinter.Y)
+frame.pack(side=Tkinter.LEFT, fill=Tkinter.Y)
+
+initGUI(listForGUI, frame, var)
 
 buttonPurge = Tkinter.Button(root, text="Purge", relief='raised', command=purgeArchive, state=Tkinter.DISABLED)
 buttonPurge.pack()
 buttonRefresh = Tkinter.Button(root, text="Refresh", relief='raised', command=refresh)
 buttonRefresh.pack()
-label = Tkinter.Label(root)
-label.pack()
 root.mainloop()
 
 client.close()
