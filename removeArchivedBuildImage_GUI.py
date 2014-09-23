@@ -47,15 +47,6 @@ client = MongoClient()
 buildCollection = getMongoDbCollectionClone()
 ##
 printMongoDbCollection(buildCollection)
-##
-##YIH##archiveDir = inputDict['archiveDir'] #"C:\\uEFI_build\\archive\\\\TCE101YUS-1.YC_Brickland_archivedAt_2014-09-12-1127_113"
-#append '\\' to archiveDir to prevent shutil.rmtree() wipes out the entire parent directory!
-##YIH##if archiveDir.endswith("\\") == False:
-##YIH##    archiveDir = "".join((archiveDir, '\\'))
-##YIH##ensureDirExists(archiveDir)
-#buildCollection = getMongoDbCollectionClone()
-##YIH##removeFromMongoDbClone(archiveDir)
-##YIH##delTree(archiveDir)
 
 ##
 printMongoDbCollection(buildCollection)
@@ -64,69 +55,48 @@ iternateThroughDictionay(dictForGUI)
 
 listForGUI = getListFromMongoDbCollection(buildCollection, 'archiveDir')
 ##
-client.close()
+
 ## if found existing record and successfully remove it, print: {u'ok': 1, u'n': 1}
 ## if not found existing record, print: {u'ok': 1, u'n': 0}
 ####
+
+def purgeArchive():
+    #append '\\' to archiveDir to prevent shutil.rmtree() wipes out the entire parent directory!
+    archiveDir = radioButtonDict[var.get()]
+    buildCollection = getMongoDbCollectionClone()
+    removeFromMongoDbClone(archiveDir)
+    if archiveDir.endswith("\\") == False:
+        archiveDir = "".join((archiveDir, '\\'))
+    ensureDirExists(archiveDir)
+    delTree(archiveDir)
+    return
+
+# prepare for GUI display
 def sel():
     print var.get()
     _text =  radioButtonDict[var.get()]
     print _text
-    selection = "You selected the option " + str(var.get())
-    #label.config(text = selection)
     label.config(text = _text)
+    buttonText = "Is it OK to purge :  " + _text + "  ?"
+    buttonPurge.config(text = buttonText, state=Tkinter.NORMAL)
 
 root = Tkinter.Tk()
 var = Tkinter.IntVar()
-##var = Tkinter.StringVar()
 
 radioButtonDict = {}
 
 for index, value in enumerate(listForGUI):
-#    button = Tkinter.Button(root, text=value + dictForGUI.get(value), relief='raised', command = sel)
-    #button = Tkinter.Radiobutton(root, text=value, relief='raised', command = sel)
-    ##button = Tkinter.Radiobutton(root, text=value, value=index, variable=var, command=sel)
-    button = Tkinter.Radiobutton(root, text=value, value=index, variable=var, command=sel)
-    button.grid(row=index, column=0)
-    button.pack( anchor = Tkinter.W )
+    radioButton = Tkinter.Radiobutton(root, text=value, value=index, variable=var, command=sel, state=Tkinter.NORMAL)
+    radioButton.grid(row=index, column=0)
+    radioButton.pack( anchor = Tkinter.W )
     radioButtonDict.update({index: value})
 
+buttonPurge = Tkinter.Button(root, text="Purge", relief='raised', command=purgeArchive, state=Tkinter.DISABLED)
+buttonPurge.pack()
+buttonRefresh = Tkinter.Button(root, text="Refresh", relief='raised')
+buttonRefresh.pack()
 label = Tkinter.Label(root)
 label.pack()
 root.mainloop()
 
-
-
-###frame1 = Tkinter.Frame()
-###s = Tkinter.Scrollbar(frame1)
-###listBox = Tkinter.Listbox(frame1)
-
-###s.pack(side=Tkinter.RIGHT, fill=Tkinter.Y)
-###listBox.pack(side=Tkinter.LEFT, fill=Tkinter.Y)
-
-###s['command'] = listBox.yview
-###listBox['yscrollcommand'] = s.set
-
-##for index in range(30): 
-##   listBox.insert(Tkinter.END, str(index))
-###for record in dictForGUI:
-###        # print out the document
-###        listBox.insert(Tkinter.END, record)
-###frame1.pack(side=Tkinter.TOP)
-###
-###frame2 = Tkinter.Frame()
-###lab = Tkinter.Label(frame2)
-###
-###def poll():
-###    lab.after(200, poll)
-###    sel = listBox.curselection()
-###    value = ""
-###    if not sel == ():
-###        value = listBox.get(sel)
-###    lab.config(text=value)
-###
-###lab.pack()
-###frame2.pack(side=Tkinter.TOP)
-###
-###poll()
-###Tkinter.mainloop()
+client.close()
