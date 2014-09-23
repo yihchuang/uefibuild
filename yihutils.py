@@ -185,7 +185,7 @@ def addToMongoDbClone(dictBuild, archiveDir):
             del newRecordToAddToDB['RepositoyWorkSpaceName']
     newRecordToAddToDB['archiveDir'] = archiveDir
     logging.debug("newRecord to add to mongoDB: " + str(newRecordToAddToDB))
-    #post_id = buildCollection.insert(newRecordToAddToDB)
+    ###post_id = buildCollection.insert(newRecordToAddToDB)
     post_id = buildCollection.save(newRecordToAddToDB)
     logging.debug("post_id: " + str(post_id))
     ##
