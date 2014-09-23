@@ -67,20 +67,28 @@ listForGUI = getListFromMongoDbCollection(buildCollection, 'archiveDir')
 client.close()
 ## if found existing record and successfully remove it, print: {u'ok': 1, u'n': 1}
 ## if not found existing record, print: {u'ok': 1, u'n': 0}
-
-
+####
 def sel():
+    print var.get()
+    _text =  radioButtonDict[var.get()]
+    print _text
     selection = "You selected the option " + str(var.get())
     label.config(text = selection)
 
 root = Tkinter.Tk()
 var = Tkinter.IntVar()
+##var = Tkinter.StringVar()
+
+radioButtonDict = {}
 
 for index, value in enumerate(listForGUI):
 #    button = Tkinter.Button(root, text=value + dictForGUI.get(value), relief='raised', command = sel)
-    button = Tkinter.Button(root, text=value, relief='raised', command = sel)
+    #button = Tkinter.Radiobutton(root, text=value, relief='raised', command = sel)
+    ##button = Tkinter.Radiobutton(root, text=value, value=index, variable=var, command=sel)
+    button = Tkinter.Radiobutton(root, text=value, value=index, variable=var, command=sel)
     button.grid(row=index, column=0)
-    button.pack()
+    button.pack( anchor = Tkinter.W )
+    radioButtonDict.update({index: value})
 
 label = Tkinter.Label(root)
 label.pack()
