@@ -98,7 +98,9 @@ srcImageFile = dictPlatform['srcImageFile']
 _archiveDir = "C:\\uEFI_build\\archive\\TCE101YUS-1.YC_Brickland_archivedAt_2014-09-12-1127_11"
 for index in '012356789':
     #_archiveDir = rectifyString(_archiveDir) 
-    archiveDir="".join((_archiveDir, str(index)))    
+    archiveDir="".join((_archiveDir, str(index)))
+    #hand made _id.
+    dictBuild.update({"_id":str(index)})    
     addToMongoDbClone(dictBuild, archiveDir)
 #newRecordToAddToDB = dictBuild.items()
 #newRecordToAddToDB['archiveDir'] = archiveDir
